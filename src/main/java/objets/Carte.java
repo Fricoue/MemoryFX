@@ -8,7 +8,6 @@ public class Carte {
     private final Image image;
     private boolean visible;
     private ImageView imageView;
-
     private final Image imageFaceCachee = new Image("/cartes/facecachee.png");
 
     public Carte(String idPaire, Image image) {
