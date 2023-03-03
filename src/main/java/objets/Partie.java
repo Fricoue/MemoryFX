@@ -1,89 +1,87 @@
 package objets;
 
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 
+import java.io.File;
 import java.util.Collections;
 
 public class Partie {
 
     private int tempsRestant;
     private int pairesRestantes;
-    private final ObservableList<Carte> listeCartes;
+    private final ObservableList<Carte> grille = FXCollections.observableArrayList();
     private int score;
-    private final int difficulte;
+    private int difficulte;
     private int hauteur;
     private int largeur;
 
-    public Partie(ObservableList<Carte> listeCartes, int difficulte) {
-        this.listeCartes = listeCartes;
-        this.tempsRestant = 0;
-        this.pairesRestantes = listeCartes.size()/2;
+    public Partie(File[] listeFichiers, int difficulte) {
+        this.pairesRestantes = listeFichiers.length/2;
         this.score = 0;
         this.difficulte = difficulte;
-        this.hauteur = 0;
-        this.largeur = 0;
-    }
-
-    public void demarrerPartie() {
-        Collections.shuffle(listeCartes); // mélange les cartes
-        creerGrille(difficulte);
-    }
-
-    private void creerGrille(int difficulte) {
-        switch (difficulte) {
+        switch (this.difficulte) {
             case 0:
-                hauteur = 4;
-                largeur = 4;
-                tempsRestant = 10;
+                this.hauteur = 4;
+                this.largeur = 4;
+                this.tempsRestant = 10;
                 break;
             case 1:
-                hauteur = 8;
-                largeur = 8;
-                tempsRestant = 5;
+                this.hauteur = 8;
+                this.largeur = 8;
+                this.tempsRestant = 5;
                 break;
             case 2:
-                hauteur = 16;
-                largeur = 16;
-                tempsRestant = 2;
+                this.hauteur = 16;
+                this.largeur = 16;
+                this.tempsRestant = 2;
                 break;
             default:
-                System.out.println("La difficulté passée en paramètre est incorrecte");
-                break;
+                throw new NullPointerException("La difficulté passée en paramètre est incorrecte");
         }
-    }
 
-    private Carte carteRetournee;
+        int nombreCartes = largeur * hauteur;
 
-    public void setCarteRetournee(Carte carteRetournee) {
-        this.carteRetournee = carteRetournee;
-    }
+        // Indice du fichier courant dans la liste des cartes
+        int indiceTableauCarte = 0;
 
-    public void retournerCarte(Carte carte) {
-        if (!carte.visible()) {
-            carte.setVisible(true);
-            carte.retourner();
-            if (carteRetournee == null) {
-                setCarteRetournee(carte);
-            } else {
-                if (carteRetournee.estPaire(carte)) {
-                    carte.retourner();
-                    carteRetournee.retourner();
-                    carte.setVisible(false);
-                    carteRetournee.setVisible(false);
-                    setCarteRetournee(null);
-                    pairesRestantes--;
-                    score += 100;
-                } else {
-                    carte.retourner();
-                    carteRetournee.retourner();
-                    carte.setVisible(false);
-                    carteRetournee.setVisible(false);
-                    setCarteRetournee(null);
-                    score -= 20;
-                }
+        for (int i = 0; i < nombreCartes; i+= 2) {
+            if (indiceTableauCarte == listeFichiers.length) {
+                indiceTableauCarte = 0;
             }
+
+            for (int j = 0; j < 2; j++) {
+                Image imageVisible = new Image(listeFichiers[indiceTableauCarte].getAbsolutePath());
+
+                grille.add(new Carte(Integer.toString(indiceTableauCarte), imageVisible));
+            }
+            indiceTableauCarte ++;
         }
+        Collections.shuffle(grille);
+
+        for (int i = 0; i < grille.size(); i++) {
+            grille.get(i).getImageView().setId(Integer.toString(i));
+        }
+    }
+
+    public static Partie initialize() {
+        File dossier = new File("src/main/resources/cartes/cartesVisibles");
+        File[] listeFichiers = dossier.listFiles();
+
+        if (listeFichiers == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Une erreur s'est produite");
+            alert.setContentText("Aucune carte n'est définie, impossible de lancer une partie");
+
+            alert.showAndWait();
+            return null;
+        }
+
+        return new Partie(listeFichiers, 0);
     }
 
     public boolean estTerminee() {
@@ -124,6 +122,10 @@ public class Partie {
 
     public int getLargeur() {
         return largeur;
+    }
+
+    public ObservableList<Carte> getGrille() {
+        return grille;
     }
 
 }

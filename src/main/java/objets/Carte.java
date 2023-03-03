@@ -1,14 +1,15 @@
 package objets;
 
+import com.example.memoire.PartieController;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class Carte {
-    private final String idPaire;
+    private String idPaire;
     private final Image image;
     private boolean visible;
     private ImageView imageView;
-    private final Image imageFaceCachee = new Image("/cartes/facecachee.png");
+    private Image imageFaceCachee = new Image("C:\\Users\\enzof\\IdeaProjects\\memoire\\src\\main\\resources\\cartes\\facecachee.png");
 
     public Carte(String idPaire, Image image) {
         this.idPaire = idPaire;
@@ -16,10 +17,19 @@ public class Carte {
         this.visible = false;
         this.imageView = new ImageView();
         this.imageView.setImage(imageFaceCachee);
+
+        this.imageView.setPreserveRatio(true);
+        this.imageView.setFitHeight(120);
+
+        this.imageView.setOnMousePressed(PartieController::retournerCarte);
     }
 
     public String getIdPaire() {
         return idPaire;
+    }
+
+    public void setIdPaire(String idPaire) {
+        this.idPaire = idPaire;
     }
 
     public Image getImage() {
@@ -54,5 +64,9 @@ public class Carte {
 
     public boolean estPaire(Carte carte) {
         return this.idPaire.equals(carte.getIdPaire());
+    }
+
+    public boolean getVisible() {
+        return this.visible;
     }
 }
